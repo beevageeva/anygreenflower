@@ -84,7 +84,7 @@ class NewHandler(BaseHandler):
 
 
 	def get(self):
-		chtml = captcha.displayhtml(public_key = CAPTCHA_PUBLIC_KEY,use_ssl = False,error = None)
+		chtml = captcha.displayhtml(public_key = NewHandler.CAPTCHA_PUBLIC_KEY,use_ssl = False,error = None)
 		template_values = {'captchahtml': chtml, "session": self.session}
 		template = JINJA_ENVIRONMENT.get_template('user/new.html')
 		self.response.write(template.render(template_values))
@@ -92,7 +92,7 @@ class NewHandler(BaseHandler):
 	def post(self):
 		challenge = self.request.get('recaptcha_challenge_field')
 		response  = self.request.get('recaptcha_response_field')
-		cResponse = captcha.submit(challenge, response, CAPTCHA_PRIVATE_KEY, REMOTE_ADDR)
+		cResponse = captcha.submit(challenge, response, NewHandler.CAPTCHA_PRIVATE_KEY, NewHandler.REMOTE_ADDR)
 		valid = True
 		errors=None
 		if cResponse.is_valid:
@@ -128,7 +128,7 @@ class NewHandler(BaseHandler):
 			errors = ["Captcha not valid"]
 		if not valid:
 			error = cResponse.error_code
-			chtml = captcha.displayhtml(public_key = CAPTCHA_PUBLIC_KEY,use_ssl = False,error = None)
+			chtml = captcha.displayhtml(public_key = NewHandler.CAPTCHA_PUBLIC_KEY,use_ssl = False,error = None)
 			template_values = {'captchahtml':chtml, "errors" : errors, "session": self.session}
 			template = JINJA_ENVIRONMENT.get_template('/user/new.html')
 			self.response.write(template.render(template_values))

@@ -5,7 +5,7 @@ import json, hashlib
 
 from google.appengine.api import users
 from google.appengine.ext import ndb
-
+from google.appengine.ext.webapp import blobstore_handlers
 
 import webapp2,jinja2
 
@@ -121,6 +121,35 @@ class DeleteAllHandler(BaseHandler):
 		self.redirect('/')
 
 
+class ExportAllHandler(BaseHandler):
+	@admin_required
+	def get(self):
+		self.response.headers['Content-Type'] = "text/xml"
+		resp = "<categories>"
+		for c in CategoryModel.query().fetch():
+			resp+="<category>"
+			resp+=c.to_xml
+			resp+="</category>"
+		resp+="</categories>"
+		self.response.out.write(resp)
+	
+
+class ImportAllHandler(BaseHandler, blobstore_handlers.BlobstoreUploadHandler):
+  def get(self):
+		template_values = {'upload_url': blobstore.create_upload_url('/category/importAll'),  'session':self.session}
+		template = JINJA_ENVIRONMENT.get_template('category/importAll.html')
+		self.response.write(template.render(template_values))
+
+
+  def post(self):
+		upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
+		blob_info = upload_files[0]
+
+		blob_info.delete() #I don't want the file stored
+		self.redirect('/product/view/%s' % self.request.get("key") )
+
+
+
 application = webapp2.WSGIApplication([
     ('/category/list', ListHandler),
     ('/category/new', NewHandler),
@@ -129,4 +158,6 @@ application = webapp2.WSGIApplication([
     ('/category/edit', EditHandler),
     ('/category/delete', DeleteHandler),
     ('/category/deleteAll', DeleteAllHandler),
+    ('/category/exportAll', ExportAllHandler),
+    ('/category/importAll', ImportAllHandler),
 ], debug=True, config=session_config)

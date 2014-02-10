@@ -115,9 +115,7 @@ class MoveHandler(BaseHandler):
 		if(coordinates and coordinates!=""):
 			um =UserMove(username = ndb.Key('UserModel', self.session['username']), coordinates=coordinates)
 			um.put()
-		waitTime = UserGameSettings.getUserGameSetting(self.session['username'], 'waitTime')
-		if(waitTime is None):
-			waitTime = UserMove.DEFAULT_WAIT_TIME
+		waitTime = UserMove.getWaitTimeAtStart(self.session['username'])
 		self.response.write(json.dumps({'color': color , 'wait_time': waitTime}))
 
 
