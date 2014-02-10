@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Categorias {% endblock %}
+
+{% block body %}
+
+
+{% if  categories|length > 0 %}
+
+<table class="gridtable"> 
+<thead> 
+<tr> 
+    <th>Name</th> 
+    <th>Descr</th> 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+		<th> Nuevo producto </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for category in categories %}
+<tr class="{{ loop.cycle('odd', 'even') }}"> 
+	<td>{{ category.name }}</td>
+	<td>{{ category.description }}</td>
+
+    <td><a href="/category/view/{{ category.key.urlsafe() }}">Detalles</a></td>
+    <td><a href="/category/edit/{{ category.key.urlsafe() }}">Editar</a></td>
+		<td> 
+			<form action="/category/delete" method="post">
+				<input type="hidden" name="key" value="{{category.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+    <td><a href="/product/new/{{ category.key.urlsafe() }}">Add</a></td>
+</tr>
+{% endfor %}
+<tbody></table>
+<br/> 
+<a href="/category/deleteAll">Borrar todas las categorias</a><br/>
+{% else %}
+<h3>No hay categorias</h3>
+{% endif %}
+
+
+
+<a href="/category/new">Crear nueva categoria</a><br/>
+
+{% endblock %}

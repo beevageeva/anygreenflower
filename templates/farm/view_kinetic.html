@@ -1,0 +1,235 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      #container {
+        background-color: #222;
+        display: inline-block;
+        width: 500px;
+        height: {{farm.size * 50}}px;
+      }
+      #buttons > input {
+        padding: 10px;
+        display: block;
+        margin-top: 5px;
+      }
+    </style>
+
+
+
+
+{% endblock %}
+
+{% block pagetitle %} Game {% endblock %}
+
+
+{% block body %}
+
+    <div id="buttons">
+      <input type="button" id="jelly" value="Punch">
+    </div>
+    <div id="container"></div>
+    <script src="/javascript/kinetic-min.js"></script>
+
+<br/>
+ELAPSED TIME:	
+<div id="time">
+ <span id="d">00</span>:<span id="h">00</span>:<span id="m">00</span>:<span id="s">00</span> 
+</div>
+
+
+
+<script defer="defer">
+
+	function updateTime(secs){
+
+		var days = Math.floor(secs / 86400) ;
+		var hours = Math.floor(( secs % 86400) / 3600)  ;
+		var minutes = Math.floor(( secs % 3600) / 60) ;
+		var seconds =  secs % 60 ; 
+		document.getElementById("d").innerHTML = days < 10 ? ("0" + days)	: days   
+		document.getElementById("h").innerHTML = hours < 10 ? ("0" + hours)	: hours   
+		document.getElementById("m").innerHTML = minutes < 10 ? ("0" + minutes)	: minutes   
+		document.getElementById("s").innerHTML = seconds < 10 ? ("0" + seconds)	: seconds
+	}
+
+
+	var height = {{farm.size}} * 50;
+  var stage = new Kinetic.Stage({
+    container: 'container',
+    width: 500,
+    height: height
+  });
+
+  var layer = new Kinetic.Layer();
+
+
+  var imageObj = new Image();
+  imageObj.src = '/images/farm/0.jpg'; 
+  var plane = new Kinetic.Image({
+    x: 0,
+    y: 0,
+    width: 50,
+    height: 50
+  }); 
+  imageObj.onload = function() {
+
+    plane.setImage(imageObj);
+    layer.add(plane);
+  };
+
+
+function addField(yPos){
+  var fieldImgObj = new Image();
+  fieldImgObj.src = '/images/farm/0c.jpg'; 
+  var field = new Kinetic.Image({
+    x: 0,
+    y: yPos,
+    width: 0,
+    height: 50
+  }); 
+  fieldImgObj.onload = function() {
+
+    field.setImage(fieldImgObj);
+    layer.add(field);
+  };
+	return field;
+}
+
+	var compareDate, xPos, yPos=0;
+  var growthFactorX = {{speed}};
+  var state = {{state}};
+  var anim = new Kinetic.Animation(function(frame) {
+		 elapsedTime = (new Date() - compareDate) / 1000
+		 updateTime(elapsedTime);
+				
+				var xRect = xPos,
+						yRect = yPos,
+						widthRect = growthFactorX,
+						heightRect = 50;
+				
+
+        if( xPos < 450 ) {
+						field.setWidth(xPos);
+            xPos = growthFactorX + xPos; // adds 3 to xPos on each loop
+        }
+				
+        else {
+						field.setWidth(500);
+						if(yPos < height - 50){
+								yPos = yPos + 50;
+								xPos = 0;
+								//widthRect = 50;
+								field = addField(yPos);
+						}
+						else{
+							widthRect = 0;
+							updateTime(0);
+            	anim.stop();
+						}
+        }
+				//alert("xpos="+ xPos);
+				//alert("ypos="+ yPos);
+        plane.setX(xPos);
+        plane.setY(yPos);
+				
+
+
+
+	
+  }, layer);
+	var field = addField(0);
+	if(growthFactorX>0){
+
+		 compareDate = new Date("{{compareDate}}");
+		 elapsedTime = (new Date() - compareDate) / 1000
+		 distance = elapsedTime * growthFactorX;
+			numrows = Math.floor(distance/500)
+			for(i=0; i<numrows && i<{{farm.size}}; i++){
+				field.setWidth(500);
+				yPos+=50;		
+				field = addField(yPos);
+			}
+			if({{farm.size}}>numrows){
+				field.setWidth(500);
+				updateTime(0);
+			}
+			else{
+				xPos = distance % 500;
+				alert(xPos);
+				field.setWidth(xPos);
+		 		updateTime(elapsedTime);
+				anim.start(); 
+				
+			}
+	}
+	else{
+			xPos = 0;
+			updateTime(0);
+	}
+
+
+  stage.add(layer);
+
+
+
+$( "#jelly" ).click(function() {
+  //alert( "Handler for .click() called." );
+	$(this).attr("disabled", "disabled");
+	 $.ajax({
+                        data: {key: '{{farm.key.urlsafe()}}' },
+                        url: '/farm/nextState',
+                        type: 'post',
+                        success: function (response) {
+														growthFactorX = response['speed'];
+														compareDate = new Date();
+														xPos=yPos=0;
+														state+=1;	
+  													anim.start();     
+												}
+	});
+
+
+});
+
+</script>
+<div id="dialog-form" title="Estado{{state}}">
+	{% include "/farm/state%dDescription.html" % state ignore missing %}
+ 
+</div>
+
+<button id="viewstate" >Informacion sobre el estado del cultivo</button>
+  <script>
+  $(function() {
+
+		$( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 600,
+      width: 800,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+          $( this ).dialog( "close" );
+      }
+    });
+    $( "#viewstate" )
+      .button()
+      .click(function() {
+        $( "#dialog-form" ).dialog( "open" );
+      });
+ 
+	});
+
+  </script>
+
+
+{% endblock %}:

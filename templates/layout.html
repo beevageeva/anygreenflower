@@ -1,0 +1,147 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+		<meta charset="utf-8" />
+		<title>any Green Flower</title>
+
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+		{% if session['theme'] %}		
+		{% set theme = session['theme'] %}
+		{%else %}
+		{% set theme = 'flick' %}
+		{% endif %}
+    <link type="text/css" rel="stylesheet" href="/stylesheets/themes/{{theme}}/jquery-ui.css" />
+		<script  src="/javascript/jquery-min.js"></script>
+		<script  src="/javascript/jqueryui-min.js"></script>
+
+		 {% block head %}{% endblock %}
+
+
+  <script>
+  $(function() {
+    $( "#menu" ).menu();
+  });
+
+
+	{% if session["usertype"] == "Admin" %}
+
+  $(function() {
+    $( "#menu2" ).menu();
+  });
+
+	{% endif %}
+  </script>
+
+  <style>
+  .ui-menu { width: 150px; }
+
+	#wrapper{
+    overflow:auto;
+	}
+	#content{
+		width: 600px;
+	}
+
+	#menu{
+   float:left;
+		width: 130px;
+	}
+
+
+	{% if session["usertype"] == "Admin" %}
+	#menu2{
+   float:right;
+		width: 130px;
+	}
+	{% endif %}
+
+  </style>
+
+  </head>
+
+  <body>
+
+<h1> {% block pagetitle %}{% endblock %} </h1>
+<div id="wrapper">
+<table cellspacing="3" valign="top"><tr><td valign='top'>
+
+<ul id="menu">
+  <li><a href="/">Home</a></li>
+
+
+			{% if session['username'] %}
+     <li><a href="/product_group/list_visible">Tienda</a></li>
+     <li><a href="/order/view">Carrito</a></li>
+     <li><a href="/order/list/{{session['username']}}">Mis pedidos</a></li>
+     <li><a href="/post/list">Foro</a></li>
+     <li><a href="/video/list">Videos</a></li>
+      <li>
+        <a href="/farm/expl">Juego</a>
+      </li>
+      	<li><a href="/user/profile">Perfil</a></li>
+      	<li><a href="/user/logout">Salir</a></li>
+
+			{% else %}
+      <li><a href="/user/new">Registrar</a></li>
+      <li><a href="/user/login">Entrar</a></li>
+			{% endif %}
+</ul>
+</td><td valign='top'>
+		
+
+			<div id="content" >
+			<div id="header" class="ui-widget-content" ><img src='/images/top.jpg' height="100%" width="100%" style="margin-top:5px;"/>
+			</div>
+		 {% block body %}{% endblock %}
+			</div>
+
+
+
+</td>
+	{% if session["usertype"] == "Admin" %}
+<td valign='top'>
+
+<ul id="menu2">
+
+
+      	<li><a href="/user/list">Lista usuarios</a></li>
+
+	
+     	<li><a href="/category/list">Categorias</a></li>
+     	<li><a href="/product/list">Todos los Productos</a></li>
+     	<li><a href="/product_group/list">Cestas</a></li>
+     	<li><a href="/order/list">Todos los pedidos</a></li>
+      <li>
+        <a href="/farm/listAll">Todos los cultivos</a>
+      </li>
+     	<li><a href="/check/blobs">Blobs</a></li>
+  <li class="ui-state-disabled"><a href="#">Estadisticas</a></li>
+</ul></td>
+
+			{% endif %}
+</tr></table>
+
+	</div><!-- wrapper-->
+
+
+	<br/>
+	<br/>
+	<br/>
+	<div class="ui-widget-content">
+	<form action="/user/change_theme" method="post">
+	<input type="hidden" name="path" id="pathId">
+	<select  name="theme">
+	{% for o in ['pepper-grinder', 'flick', 'smoothness', 'blitzer', 'mint-choc', 'le-frog', 'sunny', 'hot-sneaks', 'excite-bike', 'swanky-purse', 'trontastic', 'eggplant']: %}
+	<option value='{{o}}' {{ "selected='selected'" if theme==o else "" }}>{{o}}</option>
+	{% endfor %}
+	</select>
+	<input type="submit" value="Cambiar tema">
+	</form>
+	<script>
+		 document.getElementById('pathId').setAttribute('value', window.location.pathname);
+	</script>
+	</div>
+
+  </body>
+</html>

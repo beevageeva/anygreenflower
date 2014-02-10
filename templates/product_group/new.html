@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block head %}
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.css" />
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.theme.default.css" />
+{% endblock %}
+
+{% block pagetitle %} Nueva cesta {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/product_group/new" method="post">
+
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name') }}</dd>
+	<dt>Precio</dt> <dd>{{ forms.input('price') }}</dd>
+	<dt>Visible</dt> <dd>
+	<input type="checkbox" name="visible"	value="True" checked="checked"></dd>
+	</dl>
+      <table id="example-basic">
+				<caption>Contenido:           
+					(<a href="#" onclick="jQuery('#example-basic').treetable('expandAll'); return false;">Expand all</a>
+          <a href="#" onclick="jQuery('#example-basic').treetable('collapseAll'); return false;">Collapse all</a>)
+			</caption>
+
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+					{% for category in categories %}
+          <tr data-tt-id="{{category.key.urlsafe()}}">
+            <td>Categoria: {{category.name}}</td>
+            <td>&nbsp;</td>
+          </tr>
+					{% for product in category.get_products() %}
+          <tr data-tt-id="{{product.key.urlsafe()}}" data-tt-parent-id="{{category.key.urlsafe()}}">
+            <td>{{product.name}}</td>
+            <td>{{ forms.input("products[%s]" % (product.key.urlsafe()), '0') }}</td>
+          </tr>
+					{% endfor %}
+					{% endfor %}
+        </tbody>
+      </table>
+
+<div><input type="submit" value="Crear"></div>
+</form>
+
+
+
+
+
+    <script src="/javascript/jquery.treetable.js"></script>
+    <script>
+      $("#example-basic").treetable({ expandable: true });
+		</script>
+
+
+{% endblock %}

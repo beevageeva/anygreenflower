@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Nuevo cultivo virtual {% endblock %}
+
+
+{% block body %}
+
+{{ forms.display_errors(errors) }}
+<form action="/farm/edit" method="post">
+<input type="hidden" name="key" value="{{farm.key.urlsafe()}}">
+<dl>
+{% if session['usertype'] == 'Admin' %}
+<p>
+  <label for="state" style="color:#D96736">Estado</label>
+  <input type="text" id="state" name="state" style="border:0; color:#D96736; font-weight:bold;" readonly>
+	<div  style="color:#D96736"> filas (10 para cada fila)</div>
+	
+</p>
+<div id="slider-range-max" style="width: 50%"></div>
+  <script>
+  $(function() {
+    $( "#slider-range-max" ).slider({
+      range: "max",
+      min: 0,
+      max: 4,
+      value: {{farm.state}},
+      slide: function( event, ui ) {
+        $( "#state" ).val( ui.value );
+      }
+    });
+    $( "#state" ).val( $( "#slider-range-max" ).slider( "value" ) );
+  });
+
+
+  </script>
+<dt>Points</dt> <dd>{{ forms.input('points', farm.points) }}</dd>
+{% endif %}
+
+
+<dt>Nombre</dt> <dd>{{ forms.input('name', farm.name) }}</dd>
+
+
+ <dt>Products</dt> <dd>
+      <select name="product">  
+    {% for product in products %}
+      <option value="{{product.key.urlsafe()}}"   {{ "selected='selected'" if product.key==farm.product else "" }}  >{{product.category.get().name}}:{{product.name}}</option>
+    {% endfor %}
+
+    </select>
+
+  </dd>
+
+
+	</dl>	
+
+
+	<div><input type="submit" value="Modificar"></div>
+
+</form>
+
+
+
+{% endblock %}

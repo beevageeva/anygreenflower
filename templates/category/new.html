@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Nueva categoria {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/category/new" method="post">
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name') }}</dd>
+	<dt>Descripcion</dt> <dd>{{ forms.input('description') }}</dd>
+	</dl>	
+
+	<div><input type="submit" value="Crear"></div>
+
+</form>
+{% endblock %}

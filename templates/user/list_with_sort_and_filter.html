@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Usuarios {% endblock %}
+
+{% block body %}
+
+{%if users|length > 0%}
+<table id="myTable" width="100%"> 
+<thead> 
+<tr> 
+    <th data-sortBy="username" data-filterBy="username">Username</th> 
+    <th data-sortBy="name" data-filterBy="name">Name</th> 
+    <th data-sortBy="email" data-filterBy="email">Email</th> 
+    <th>Activo</th> 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for user in users %}
+<tr> 
+	<td>{{ user.username }}</td>
+	<td>{{ user.name }}</td>
+	<td>{{ user.email }}</td>
+	<td>{{ user.active }}(<a href="/user/change_active/{{ user.username }}">Cambiar</a>)</td>
+
+    <td><a href="/user/view/{{ user.username }}">Detalles</a></td>
+    <td><a href="/user/edit/{{ user.username }}">Editar</a></td>
+		<td> 
+			<form action="/user/delete" method="post">
+				<input type="hidden" name="username" value="{{user.username}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+</tr>
+{% endfor %}
+</tbody></table> 
+
+<script>
+		
+		var myAjaxData = {'filter':{}, 'sort':{}}
+		function sendAjaxRequest(){
+			$.ajax({
+				data: myAjaxData,
+				url: '/user/listajax',
+				type: 'post',
+				success: function (response) {
+										htmltext="";
+										for(var i in response['users']){
+											htmltext += "<tr>";
+											u=response['users'][i];
+											htmltext+="<td>" + u['username'] + "</td>";
+											htmltext+="<td>" + u['name'] + "</td>";
+											htmltext+="<td>" + u['email'] + "</td>";
+											htmltext+="<td>" + u['active'] + "</td>";
+											htmltext+="<td><a href='/user/view/" + u['username'] + "'>Detalles</a></td>";
+											htmltext+="<td><a href='/user/edit/" + u['username'] + "'>Editar</a></td>";
+											htmltext+="<td>";
+											htmltext+="	<form action='/user/delete' method='post'>";
+											htmltext+="		<input type='hidden' name='username' value='" + u['username'] + "'>";
+											htmltext+="		<input type='submit'  value='Borrar'>";
+											htmltext+="	</form>";
+											htmltext+="</td>";
+											htmltext+="</tr>";
+										}
+										//alert("htmltext="+htmltext);
+										$('#myTable tbody').html(htmltext);
+         					}
+			});
+
+
+		}
+
+		$('#myTable th[data-sortBy]').each(function () {
+			$(this).append("<img src=\"/images/asc.gif\" alt=\"asc\"/>");
+			$(this).append("<img src=\"/images/desc.gif\" alt=\"desc\"/>");
+		 }); 
+
+		$('#myTable th[data-filterBy]').each(function () {
+			$(this).append("<br/><input type=\"text\"\">");
+		 }); 
+
+
+		$('#myTable th[data-filterBy] input').keyup(function () {
+				//only one filter
+				myAjaxData['filter'] = {};
+				var thisFilterByColumn = $(this).parent().attr('data-filterBy') ;
+			$('#myTable th[data-filterBy] input').each(function () {
+					if( $(this).parent().attr('data-filterBy') !=thisFilterByColumn){
+							$(this).val("");
+						}
+				}); //delete value from other input text
+				myAjaxData['filter'][$(this).parent().attr('data-filterBy') ] = $(this).val();
+				sendAjaxRequest();
+		});
+
+		$('#myTable th[data-sortBy] img').click(function () {
+				myAjaxData['sort'][$(this).parent().attr('data-sortBy') ] = $(this).attr('alt');
+				sendAjaxRequest();
+		});
+
+
+</script>
+ 
+<a href="/user/deleteAll">Borrar todos los usuarios</a>
+
+{%else%}
+	<p style='color:red'> No hay usuarios </p>
+{%endif%}
+
+{% endblock %}

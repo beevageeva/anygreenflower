@@ -1,0 +1,46 @@
+
+<div id="dialog-edit-form" title="Comentario">
+  <p>Edita el comentario</p>
+ 
+  <form id="editComment" action="/post/edit" method="post" >
+  <fieldset>
+    <input type="hidden" name="key" id="ref-edit">
+    <textarea rows="10" cols="50"  name="content" id="content-edit" class="text ui-widget-content ui-corner-all"> </textarea><br/>
+		<input type="submit" value="Comentar" >
+  </fieldset>
+  </form>
+</div>
+
+  <script>
+  $(function() {
+
+		$( "#dialog-edit-form" ).dialog({
+      autoOpen: false,
+      height: 300,
+      width: 600,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+          $( this ).dialog( "close" );
+      }
+    });
+ 
+    $( ".edit-post" )
+      .button()
+      .click(function() {
+        $( "#dialog-edit-form" ).dialog( "open" );
+				$("#ref-edit").val($(this).attr('data-ref'));
+				//alert($("#content" + $(this).attr('data-ref')).html() );
+				//$("#content-edit").val( $("#content" + $(this).attr('data-ref')).html());
+				$("#content-edit").val($(this).attr('data-content'));
+      });
+
+
+	});
+
+  </script>
+

@@ -1,0 +1,302 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+
+        <script>
+						var colors = ['#9C80BA','#426B20', '#6B3E20', '#959AAB', '#E3243E', '#403637' ];
+						var icolor = {{farm.state}};
+            window.onload = function () {
+								var waitTime = {{waitTime}};
+								if(waitTime>0){
+											$('#jelly').attr("disabled", "disabled");
+											setTimeout(updateClock, 1000);
+								}
+								{%if farm.state == 4 %}
+								else{
+										icolor=5;
+										$('#jelly').attr("disabled", "disabled");
+										$('#jelly').val('Has acabado la cosecha');
+								}
+								{% endif %}
+
+$( "#jelly" ).click(function() {
+  //alert( "Handler for .click() called." );
+	$(this).attr("disabled", "disabled");
+	 $.ajax({
+                        data: {key: '{{farm.key.urlsafe()}}' },
+                        url: '/farm/nextState',
+                        type: 'post',
+												dataType: "json", 
+                        success: function (response) {
+													waitTime = response.waitTime;
+													if(waitTime>0){
+														icolor++;	
+														$("#dialog-form").attr("title", "Estado " + icolor);
+														setTimeout(updateClock, 1000);
+													}
+												}
+	});
+
+
+});
+
+
+								
+                    html = [
+                        document.getElementById("h"),
+                        document.getElementById("m"),
+                        document.getElementById("s"),
+                        document.getElementById("d"),
+                    ];
+
+                function updateVal(value, total, id) {
+
+                    html[id].innerHTML = (value < 10 ? "0" : "") + value;
+                    html[id].style.color = 'red';
+                }
+
+
+								
+								function secToTime(secs){
+
+									var days = Math.floor(secs / 86400) ;
+									var hours = Math.floor(( secs % 86400) / 3600)  ;
+									var minutes = Math.floor(( secs % 3600) / 60) ;
+									var seconds =  Math.floor(secs % 60) ;    
+									return{d: days, h: hours, m: minutes, s: seconds};
+						}
+
+
+                function updateClock() {
+										if(waitTime>=0){
+											var dtf = secToTime(waitTime);
+                    	updateVal(dtf['s'], 60,  2);
+                    	updateVal(dtf['m'], 60, 1);
+                    	updateVal(dtf['h'], 24, 0);
+                    	updateVal(dtf['d'] , 31, 3);
+											waitTime-=1;
+											setTimeout(updateClock, 1000);
+										}
+										else{
+											//start again
+											{% if farm.state < 4 %}
+												$('#jelly').removeAttr("disabled");
+											{% else %}
+												$('#jelly').val('Has acabado la cosecha');
+												icolor=5;		
+											{% endif %}
+											//if loading page and it is in wait, there is no thisObj defined
+										}
+                  };
+
+							//end clock
+
+            };
+        </script>
+
+<script type="text/javascript" src="/javascript/rhill-voronoi-core.js"></script>
+<script src="/javascript/paper.js"></script>
+
+
+
+
+
+
+{% endblock %}
+
+{% block pagetitle %} Game {% endblock %}
+
+
+{% block body %}
+<br/>
+<br/>
+<hr/>
+<br/>
+    <div id="buttons">
+      <input type="button" id="jelly" value="Siguiente etapa">
+    </div>
+
+
+<script type="text/paperscript" canvas="canvas-1">
+var voronoi =  new Voronoi();
+var sites = generateBeeHivePoints(view.size / 200, true);
+var bbox, diagram;
+var oldSize = view.size;
+var spotColor = new Color(colors[icolor]);
+var mousePos = view.center;
+var selected = false;
+
+onResize();
+
+function onMouseDown(event) {
+	sites.push(event.point);
+	renderDiagram();
+}
+
+function onMouseMove(event) {
+	mousePos = event.point;
+	if (event.count == 0)
+		sites.push(event.point);
+	sites[sites.length - 1] = event.point;
+	renderDiagram();
+}
+
+function renderDiagram() {
+	spotColor = new Color(colors[icolor]);
+	project.activeLayer.children = [];
+	var diagram = voronoi.compute(sites, bbox);
+	if (diagram) {
+		for (var i = 0, l = sites.length; i < l; i++) {
+			var cell = diagram.cells[sites[i].voronoiId];
+			if (cell) {
+				var halfedges = cell.halfedges,
+					length = halfedges.length;
+				if (length > 2) {
+					var points = [];
+					for (var j = 0; j < length; j++) {
+						v = halfedges[j].getEndpoint();
+						points.push(new Point(v));
+					}
+					createPath(points, sites[i]);
+				}
+			}
+		}
+	}
+}
+
+function removeSmallBits(path) {
+	var averageLength = path.length / path.segments.length;
+	var min = path.length / 50;
+	for(var i = path.segments.length - 1; i >= 0; i--) {
+		var segment = path.segments[i];
+		var cur = segment.point;
+		var nextSegment = segment.next;
+		var next = nextSegment.point + nextSegment.handleIn;
+		if (cur.getDistance(next) < min) {
+			segment.remove();
+		}
+	}
+}
+
+function generateBeeHivePoints(size, loose) {
+	var points = [];
+	var col = view.size / size;
+	for(var i = -1; i < size.width + 1; i++) {
+		for(var j = -1; j < size.height + 1; j++) {
+			var point = new Point(i, j) / new Point(size) * view.size + col / 2;
+			if(j % 2)
+				point += new Point(col.width / 2, 0);
+			if(loose)
+				point += (col / 4) * Point.random() - col / 4;
+			points.push(point);
+		}
+	}
+	return points;
+}
+function createPath(points, center) {
+	var path = new Path();
+	if (!selected) { 
+		path.fillColor = spotColor;
+	} else {
+		path.fullySelected = selected;
+	}
+	path.closed = true;
+
+	for (var i = 0, l = points.length; i < l; i++) {
+		var point = points[i];
+		var next = points[(i + 1) == points.length ? 0 : i + 1];
+		var vector = (next - point) / 2;
+		path.add({
+			point: point + vector,
+			handleIn: -vector,
+			handleOut: vector
+		});
+	}
+	path.scale(0.95);
+	removeSmallBits(path);
+	return path;
+}
+
+function onResize() {
+	var margin = 20;
+	bbox = {
+		xl: margin,
+		xr: view.bounds.width - margin,
+		yt: margin,
+		yb: view.bounds.height - margin
+	};
+	for (var i = 0, l = sites.length; i < l; i++) {
+		sites[i] = sites[i] * view.size / oldSize;
+	}
+	oldSize = view.size;
+	renderDiagram();
+}
+
+function onKeyDown(event) {
+	if (event.key == 'space') {
+		selected = !selected;
+		renderDiagram();
+	}
+}
+</script>
+
+
+
+
+<div id=farmPaperCanvas>
+<canvas width="600" height="{{100 * farm.size}}"  id="canvas-1"></canvas>
+<div>
+
+
+
+
+<table border="1"><tr><td>
+<div id="time" style="color:#fc0">
+TIEMPO DE ESPERA:	
+ <span id="d">00</span>:<span id="h">00</span>:<span id="m">00</span>:<span id="s">00</span> 
+</div></td><td>
+<div id="puntos" style="color:#fc0">
+PUNTOS:	
+ <span id="points">{{farm.points}}</span> 
+</div></td></tr></table>
+
+<div id="dialog-form" title="Estado {{farm.state}}">
+	<p id='dialogContent'>NO LOAD</p> 
+</div>
+
+<button id="viewstate" >Informacion sobre el estado del cultivo</button>
+  <script>
+  $(function() {
+
+		$( "#dialog-form" ).dialog({
+      autoOpen: false,
+      width: 600,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+          $( this ).dialog( "close" );
+      },
+			open: function(){
+			$( "#dialogContent" ).load( "/static/farm/state" + icolor + "Description.html", function() {
+        	$( this ).dialog( "open" );
+			});
+
+     }
+
+    });
+    $( "#viewstate" )
+      .button()
+      .click(function() {
+        $( "#dialog-form" ).dialog( "open" );
+      });
+ 
+	});
+
+  </script>
+
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+{% block head %}
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.css" />
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.theme.default.css" />
+{% endblock %}
+
+{% block pagetitle %} Editar cesta {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/product_group/edit" method="post">
+{{ forms.input('key', product_group.key.urlsafe(), "hidden") }}
+
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name', product_group.name) }}</dd>
+	<dt>Precio</dt> <dd>{{ forms.input('price', product_group.price) }}</dd>
+	<dt>Visible</dt> <dd>
+	<input type="checkbox" name="visible"	value="True" 
+	{% if product_group.visible %}
+		checked="checked"
+	{% endif %}
+	></dd>
+	</dl>
+      <table id="example-basic">
+				<caption>Contenido:           
+					(<a href="#" onclick="jQuery('#example-basic').treetable('expandAll'); return false;">Expand all</a>
+          <a href="#" onclick="jQuery('#example-basic').treetable('collapseAll'); return false;">Collapse all</a>)
+			</caption>
+
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Visible</th>
+            <th>Detalles</th>
+            <th>Cantidad</th>
+          </tr>
+        </thead>
+        <tbody>
+					{% for category in categories %}
+          <tr data-tt-id="{{category.key.urlsafe()}}">
+            <td>Categoria: {{category.name}}</td>
+            <td>&nbsp;</td>
+            <td><a href="/category/view/{{category.key.urlsafe()}}">Detalles</a></td>
+            <td>&nbsp;</td>
+          </tr>
+					{% for product in category.get_products() %}
+					{% set qty = product_group.getItemQty(product.key.urlsafe()) %} 
+          <tr data-tt-id="{{product.key.urlsafe()}}" data-tt-parent-id="{{category.key.urlsafe()}}">
+            <td>{{product.name}}</td>
+            <td>{{product.visible}}</td>
+            <td><a href="/product/view/{{product.key.urlsafe()}}">Detalles</a></td>
+            <td>{{ forms.input("products[%s]" % product.key.urlsafe(), qty) }}&nbsp;{{product.units}} </td>
+          </tr>
+					
+					{% endfor %}
+					{% endfor %}
+        </tbody>
+      </table>
+
+<div><input type="submit" value="Actualizar"></div>
+</form>
+
+
+
+
+<a href="/product_group/view/{{ product_group.key.urlsafe() }}">Detalles</a> <br/>
+
+    <script src="/javascript/jquery.treetable.js"></script>
+    <script>
+      $("#example-basic").treetable({ expandable: true });
+      $("#example-basic").treetable("expandAll");
+		</script>
+
+
+{% endblock %}

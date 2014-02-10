@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Productos {% endblock %}
+
+{% block body %}
+
+<table> 
+<thead> 
+<tr> 
+    <th>Nombre</th> 
+    <th>Visible</th>
+ 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for product_group in product_groups %}
+<tr> 
+	<td>{{ product_group.name }}</td>
+	<td>{{ product_group.visible }}</td>
+
+    <td><a href="/product_group/view/{{ product_group.key.urlsafe() }}">Detalles</a></td>
+    <td><a href="/product_group/edit/{{ product_group.key.urlsafe() }}">Editar</a></td>
+		<td> 
+			<form action="/product_group/delete" method="post">
+				<input type="hidden" name="key" value="{{product_group.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+</tr>
+{% endfor %}
+<tbody></table> 
+
+
+<a href="/product_group/new">Añadir cesta</a>
+
+<a href="/product_group/deleteAll">Borrar todas las cestas</a>
+
+{% endblock %}

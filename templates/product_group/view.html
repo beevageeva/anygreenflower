@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} Detalles de la cesta {% endblock %}
+
+{% block body %}
+
+{% include "/order/order_dialog.html" ignore missing %}
+
+	<dl>
+		<dt>{{ product_group.name }}</dt><dd><button class="create-order" data-ref={{ product_group.key.urlsafe() }} >Pedir</button>
+</dd>
+	<dt>Precio:</dt> <dd>{{ product_group.price }}</dd>
+{% if session['usertype'] == "Admin" %}	
+	<dt>Visible:</dt> <dd>{{ product_group.visible }}</dd>
+{% endif %}
+	<dt>Contenido:</dt> <dd>
+	{% if product_group.items|length > 0  %}
+	{% set vars = {'totalprice': 0} %}
+	<table><thead>
+	<tr>
+		{% if session['usertype'] == "Admin" %}	
+		<th>Quitar de la cesta</th>	
+		{% endif %}
+		<th>Cantidad</th>	
+		<th>Nombre</th>
+		<th>Categoria</th>
+		<th>Detalles</th>
+		<th>Precio/unidad</th>
+	</tr></thead>
+	<tbody>
+	{% for item in product_group.items  %}
+	{% set product = item.product.get()  %}
+		<tr>
+		{% if session['usertype'] == "Admin" %}	
+		<td>
+		<form action="/product_group/deleteItem" method="post">
+				<input type="hidden" name="key" value="{{product_group.key.urlsafe()}}">
+				<input type="hidden" name="pkey" value="{{item.product.urlsafe()}}">
+				<input type="submit"  value="Quitar">
+		</form>
+		</td>
+		{% endif %}
+		<td>
+				{{item.qty}}&nbsp;{{product.units}}
+
+		</td>
+		{%if not product %}
+			<td colspan='4' style='color: red'>borrado</td>
+		{% else%}		
+			{% if vars.update({'totalprice': vars.totalprice + product.price * item.qty}) %}{% endif %}
+			<td>
+				{{product.name}}
+			</td>
+			<td>
+				{{product.category.get().name}}
+			</td>
+			<td>
+  		<a href="/product/view/{{item.product.urlsafe()}}">
+				<img src="/download/{{product.imgBlobKey}}" width="80" height="60" alt="imagen no disponible"/>
+			</a> <br/>
+			</td>
+			<td>
+				{{product.price}}/{{product.units}}
+			</td>
+		{% endif %}	
+		</tr>
+	{% endfor  %}
+	</tbody></table><br/>
+	<b>Descuento:</b>{{vars.totalprice - product_group.price}}<br/>
+
+	{% endif %}
+
+
+	</dd>
+	</dl>
+{% if session['usertype'] == "Admin" %}	
+  <a href="/product_group/edit/{{ product_group.key.urlsafe() }}">Editar</a> <br/>
+	<form action="/product_group/delete" method="post">
+				<input type="hidden" name="productname" value="{{product_group.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+	</form><br/>
+  <a href="/product_group/list">Lista(Admin)</a> <br/>
+{% endif %}
+
+<br/>
+{% endblock %}

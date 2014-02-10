@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} Detalles de usuario {% endblock %}
+
+{% block body %}
+
+
+	<dl>
+	<dt>Nombre de usuario:</dt> <dd>{{ user.username }}</dd>
+	<dt>Correo electronico:</dt> <dd>{{ user.email }}</dd>
+	<dt>Nombre:</dt> <dd>{{ user.name }}</dd>
+	<dt>Telefono:</dt> <dd>{{ user.phone }}</dd>
+	<dt>Direccion:</dt> <dd>{{ user.address }}</dd>
+	<dt>Admin:</dt> <dd>{{ "Si" if user.usertype=="Admin" else "No" }}</dd>
+	</dl>
+  <a href="/user/edit/{{ user.username }}">Editar</a> <br/>
+	<form action="/user/delete" method="post">
+				<input type="hidden" name="username" value="{{user.username}}">
+				<input type="submit"  value="Borrar">
+	</form>
+
+
+{% endblock %}

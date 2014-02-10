@@ -1,0 +1,44 @@
+
+<div id="dialog-form" title="Añadir al carrito">
+  <p>Introduzca la cantidad</p>
+ 
+  <form id="addForm" action="/order/add" method="post" >
+  <fieldset>
+    <input type="hidden" name="ref" id="ref">
+    <label for="qty">Cantidad</label>
+    <input type="text" name="qty" id="qty" class="text ui-widget-content ui-corner-all" value="1">
+		<input type="submit" value="Submit" >
+  </fieldset>
+  </form>
+</div>
+
+  <script>
+  $(function() {
+
+		$( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 300,
+      width: 350,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+          $( this ).dialog( "close" );
+      }
+    });
+ 
+    $( ".create-order" )
+      .button()
+      .click(function() {
+        $( "#dialog-form" ).dialog( "open" );
+				$("#ref").val($(this).attr('data-ref'));
+      });
+
+
+	});
+
+  </script>
+

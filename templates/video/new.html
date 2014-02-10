@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Nuevo video {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/video/new" method="post">
+
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name') }}</dd>
+	<dt>Descripcion</dt> <dd>{{ forms.textarea('content') }}</dd>
+
+	</dl>	
+
+	<div><input type="submit" value="Crear"></div>
+
+</form>
+{% endblock %}

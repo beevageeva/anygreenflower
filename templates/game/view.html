@@ -1,0 +1,264 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+ <script src="/javascript/raphael-min.js"></script>
+
+        <script>
+            window.onload = function () {
+                document.getElementById("holder").innerHTML = "";
+								//TODO I dont know how to remove event listeners so I use this var state
+								var state = "start";
+								var waitTime = {{wait_time}};
+								if(waitTime>0){
+											state = "moved"	
+											setTimeout(updateClock, 1000);
+								}
+								var coordinates = "{{coordinates}}";
+								
+
+                var R = Raphael("holder", 430, 280);
+								R.text(50, 10, "Inventario").attr({font: "32px Fontin-Sans, Arial", fill: "#fc0", "text-anchor": "start"});
+								coordText = R.text(300, 10, "x, y: " + coordinates.replace("|", ",")).attr({font: "20px Fontin-Sans, Arial", fill: "#fc0", "text-anchor": "start"});
+
+
+								var invitems = R.set();
+								{% for item in game_items %}
+									ycoord = 30 + {{loop.index0*20}};
+									R.circle(50,ycoord,7).attr({fill: "hsb(." + {{item.color}} +", .75, .75)","fill-opacity": .5 });
+									//text = R.text(70, ycoord, "("+{{item.level}}+")," + {{item.number}})
+									text = R.text(70, ycoord, "" + {{item.number}})
+									text.data('res-item', {{item.level}} + '_' + {{item.color}} + '_' + {{item.number}});
+									invitems.push(text);
+								{% endfor %}
+
+								var targets = R.set();
+								var centerX = 200,centerY = 100;	
+                targets.push(
+                   R.circle(centerX-50, centerY-50, 20),
+                   R.circle(centerX, centerY-50, 20),
+                   R.circle(centerX+50, centerY-50, 20),
+                   R.circle(centerX-50, centerY, 20),
+                   R.circle(centerX+50, centerY, 20),
+                   R.circle(centerX-50, centerY+50, 20),
+                   R.circle(centerX, centerY+50, 20),
+                   R.circle(centerX+50, centerY+50, 20));
+                targets.attr({fill: "#000", stroke: "#fc0",  opacity: .2, "stroke-width": 5});
+                var butt = R.circle(centerX, centerY, 20).attr({fill: "#fff", "fill-opacity": .5, "stroke-width": 5});
+								var thisObj;
+                targets.click(function () {
+										if(state=="start"){
+											//change here the state in order to prevent subseq mouse clicks before receiving response from server
+											state = "moved"	
+											thisObj=this;
+											xycoord = coordinates.split("|");	
+											xcoord = parseInt(xycoord[0]);	
+											ycoord = parseInt(xycoord[1]);	
+											difcx = this.attr('cx') - centerX;
+											difcy = this.attr('cy') - centerY;
+											if(difcx<0){
+												xcoord-=1;
+											}
+											else if(difcx>0){
+												xcoord+=1;
+											}	
+											if(difcy<0){
+												ycoord-=1;
+											}
+											else if(difcy>0){
+												ycoord+=1;
+											}	
+											coordinates = xcoord+"|"+ ycoord;
+											$.ajax({
+												data: {coord: coordinates},
+												url: '/game/move',
+												type: 'post',
+												success: function (response) {
+													intc = response['color'];
+													waitTime = parseInt(response['wait_time']);
+													//alert("waitTime " + waitTime);		
+													if(waitTime>0){
+														setTimeout(updateClock, 1000);
+													}
+													else{
+														state = "start"
+													}
+    			                butt.animate({cx: thisObj.attr('cx'), cy: thisObj.attr('cy'), fill: "hsb(." + intc +", .75, .75)"}, 1000, "bounce");
+													butt.attr({cx: thisObj.attr('cx'), cy: thisObj.attr('cy'), fill: "hsb(." + intc + ", .75, .75)"});
+													thisObj.attr({cx: centerX, cy: centerY});
+
+													//update inventory
+													found = false;
+													lasty = 10;
+													for(index in invitems){
+															item = invitems[index];
+															//alert(item.attr('text'));
+															if(!found && item.data && item.data('res-item').indexOf('1_' + intc+'_')==0){
+																newnumber = parseInt(item.data('res-item').split('_')[2]) + 1;
+																//item.attr('text', '(1),' + newnumber );
+																item.attr('text', '' + newnumber );
+																item.data('res-item', '1_'+intc+'_'+newnumber);						
+																found = true;	
+															}
+															if(item.attr){	
+																lasty = item.attr('y');
+															}
+													}	
+													if(!found){
+														//add
+														ycoord = lasty+20;		
+														R.circle(50,ycoord,7).attr({fill: "hsb(." + intc +", .75, .75)"});
+														//text = R.text(70, ycoord, "(1),1")
+														text = R.text(70, ycoord, "1")
+														text.data('res-item', '1_' + intc + '_1' );
+														invitems.push(text);
+
+													}
+													
+												//update coordinates text	
+													coordText.attr('text',"x, y: " + coordinates.replace("|", ","));
+
+												}	
+											});
+										}
+								})
+                butt.mouseover(function () {
+										if(state=="start"){
+                    	butt.animate({fill: "#fc0"}, 300);
+										}
+                }).mouseout(function () {
+										if(state=="start"){
+                    	butt.stop().attr({fill: "#fff"});
+										}
+                });
+
+		
+								//clock
+
+								    clock_radius = 40,
+										clock_x = 50,
+										clock_y = 230,
+										clock_radius_dec= 7,
+												
+                    param = {stroke: "#fff", "stroke-width": 3},
+                    hash = document.location.hash,
+                    marksAttr = {fill: hash || "#444", stroke: "none"},
+                    html = [
+                        document.getElementById("h"),
+                        document.getElementById("m"),
+                        document.getElementById("s"),
+                        document.getElementById("d"),
+                    ];
+                // Custom Attribute
+                R.customAttributes.arc = function (value, total, radius) {
+                    var alpha = 360 / total * value,
+                        a = (90 - alpha) * Math.PI / 180,
+                        x = clock_x + radius * Math.cos(a),
+                        y = clock_y - radius * Math.sin(a),
+                        color = "hsb(".concat(Math.round(radius) / 20, ",", value / total, ", .75)"),
+                        path;
+                    if (total == value || value==0) {
+                        path = [["M", clock_x, clock_y - radius], ["A", radius, radius, 0, 1, 1, (clock_x - 0.01), clock_y - radius]];
+                    } else {
+                        path = [["M", clock_x, clock_y - radius], ["A", radius, radius, 0, +(alpha > 180), 1, x, y]];
+                    }
+                    return {path: path, stroke: color};
+                };
+								r = clock_radius;
+                drawMarks(r, 60);
+                var sec = R.path().attr(param).attr({arc: [0, 60, r]});
+                r -= clock_radius_dec;
+                drawMarks(r, 60);
+                var min = R.path().attr(param).attr({arc: [0, 60, r]});
+                r -= clock_radius_dec;
+                drawMarks(r, 24);
+                var hor = R.path().attr(param).attr({arc: [0, 24, r]});
+                r -= clock_radius_dec;
+                drawMarks(r, 31);
+                var day = R.path().attr(param).attr({arc: [0, 31, r]});
+
+                function updateVal(value, total, clock_radius, hand, id) {
+                    var color = "hsb(".concat(Math.round(clock_radius) / 20, ",", value / total, ", .75)");
+												
+                    hand.animate({arc: [value, total, clock_radius]}, 900, "bounce");
+
+                    html[id].innerHTML = (value < 10 ? "0" : "") + value;
+                    html[id].style.color = Raphael.getRGB(color).hex;
+                }
+
+                function drawMarks(clock_radius, total) {
+                    var color = "hsb(".concat(Math.round(clock_radius) / 200, ", 1, .75)"),
+                        out = R.set();
+                    for (var value = 0; value < total; value++) {
+                        var alpha = 360 / total * value,
+                            a = (90 - alpha) * Math.PI / 180,
+                            x = clock_x + clock_radius * Math.cos(a),
+                            y = clock_y - clock_radius * Math.sin(a);
+                        out.push(R.circle(x, y, 2).attr(marksAttr));
+                    }
+                    return out;
+                }
+
+								
+								function secToTime(secs){
+
+									var days = Math.floor(secs / 86400) ;
+									var hours = Math.floor(( secs % 86400) / 3600)  ;
+									var minutes = Math.floor(( secs % 3600) / 60) ;
+									var seconds =  Math.floor(secs % 60) ;    
+									return{d: days, h: hours, m: minutes, s: seconds};
+						}
+
+
+                function updateClock() {
+										if(waitTime>=0){
+											var dtf = secToTime(waitTime);
+											r = clock_radius;
+                    	updateVal(dtf['s'], 60, r, sec, 2);
+											r-= clock_radius_dec;
+                    	updateVal(dtf['m'], 60, r, min, 1);
+											r-= clock_radius_dec;
+                    	updateVal(dtf['h'], 24, r, hor, 0);
+											r-= clock_radius_dec;
+                    	updateVal(dtf['d'] , 31, r, day, 3);
+											waitTime-=1;
+											setTimeout(updateClock, 1000);
+										}
+										else{
+											//start again
+											state="start";
+											//if loading page and it is in wait, there is no thisObj defined
+											if(thisObj){
+												thisObj.attr({cx: butt.attr('cx'), cy: butt.attr('cy'), fill:"#000"});
+												butt.attr({cx: centerX, cy: centerY, fill: "#fff"});
+											}
+										}
+                  };
+
+							//end clock
+
+
+
+            };
+        </script>
+
+
+
+{% endblock %}
+
+{% block pagetitle %} Game {% endblock %}
+
+
+{% block body %}
+<br/>
+<br/>
+<hr/>
+<br/>
+ <div id="holder"></div>
+WAIT TIME:	
+<div id="time">
+ <span id="d">00</span>:<span id="h">00</span>:<span id="m">00</span>:<span id="s">00</span> 
+</div>
+
+
+{% endblock %}

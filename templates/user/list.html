@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Usuarios {% endblock %}
+
+{% block body %}
+
+{%if users|length > 0%}
+<table class="gridtable"> 
+<thead> 
+<tr> 
+    <th>Username</th> 
+    <th>Activo</th> 
+		<th>Ver</th>
+		<th>Editar</th>
+		<th>Borrar</th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for user in users %}
+<tr class="{{ loop.cycle('odd', 'even') }}" > 
+	<td>{{ user.username }}</td>
+	<td>{{ user.active }}(<a href="/user/change_active/{{ user.username }}">Cambiar</a>)</td>
+
+    <td><a href="/user/view/{{ user.username }}">Detalles</a></td>
+    <td><a href="/user/edit/{{ user.username }}">Editar</a></td>
+		<td> 
+			<form action="/user/delete" method="post">
+				<input type="hidden" name="username" value="{{user.username}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+</tr>
+{% endfor %}
+</tbody></table> 
+
+ 
+<a href="/user/deleteAll">Borrar todos los usuarios</a><br/>
+<a href="/user/csv_export">Export</a><br/>
+<a href="/user/csv_import">Importar CSV</a>
+
+{%else%}
+	<p style='color:red'> No hay usuarios </p>
+{%endif%}
+
+{% endblock %}

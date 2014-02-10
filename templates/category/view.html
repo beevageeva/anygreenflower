@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} Detalles de la categoria {% endblock %}
+
+{% block body %}
+
+
+	<dl>
+	<dt>Name:</dt> <dd>{{ category.name }}</dd>
+	<dt>Desc:</dt> <dd>{{ category.description }}</dd>
+
+{% set products = category.get_products() %}
+{% if products|length > 0 %}
+
+
+<table id="myTable" class="tablesorter"> 
+<thead> 
+<tr> 
+    <th data-sortBy="name" data-filterBy="name">Name</th> 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for product in products %}
+<tr> 
+	<td>{{ product.name }}</td>
+
+    <td><a href="/product/view/{{ product.key.urlsafe() }}">Detalles</a></td>
+    <td><a href="/product/edit/{{ product.key.urlsafe() }}">Editar</a></td>
+		<td> 
+			<form action="/product/delete" method="post">
+				<input type="hidden" name="key" value="{{product.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+</tr>
+{% endfor %}
+<tbody></table> 
+{% endif %}	
+
+
+	</dl>
+  <a href="/category/edit/{{ category.key.urlsafe() }}">Editar</a> <br/>
+	<form action="/category/delete" method="post">
+				<input type="hidden" name="categoryname" value="{{category.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+	</form>
+
+
+{% endblock %}

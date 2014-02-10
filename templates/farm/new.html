@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Nuevo cultivo virtual {% endblock %}
+
+
+{% block body %}
+{% if maxSize>0 %}
+
+{{ forms.display_errors(errors) }}
+<form action="/farm/new" method="post">
+
+
+<p>
+  <label for="size" style="color:#D96736">Tamaño</label>
+  <input type="text" id="size" name="size" style="border:0; color:#D96736; font-weight:bold;" readonly>
+	<div  style="color:#D96736"> filas (10 para cada fila)</div>
+	
+</p>
+<div id="slider-range-max" style="width: 50%"></div>
+
+
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name') }}</dd>
+
+
+ <dt>Products</dt> <dd>
+      <select name="product">  
+    {% for product in products %}
+      <option value="{{product.key.urlsafe()}}">{{product.category.get().name}}:{{product.name}}</option>
+    {% endfor %}
+
+    </select>
+
+  </dd>
+
+
+	</dl>	
+
+
+	<div><input type="submit" value="Crear"></div>
+
+</form>
+  <script>
+  $(function() {
+    $( "#slider-range-max" ).slider({
+      range: "max",
+      min: 1,
+      max: {{maxSize}},
+      value: 2,
+      slide: function( event, ui ) {
+        $( "#size" ).val( ui.value );
+      }
+    });
+    $( "#size" ).val( $( "#slider-range-max" ).slider( "value" ) );
+  });
+
+
+  </script>
+
+{% else %}
+
+	No tienes ningun <b style="color:#D96736;font-size:40px;opacity:0.5"> &#8226;  </b>
+{% endif %}
+
+
+{% endblock %}

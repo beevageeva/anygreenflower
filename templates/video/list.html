@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+
+
+{% block pagetitle %} Videos {% endblock %}
+{% block body %}
+
+
+
+
+{% if videos|length > 0  %}
+Numero de paginas: {{numPages}}
+<form action="/video/list" method='post'>
+<select name='page'>
+{% for p in range(numPages) %}
+	<option value='{{p}}' {{ "selected='selected'" if page==p else "" }}>{{p+1}}</option>
+{% endfor %}
+</select>
+{%if searchContent %}
+	<input type="hidden" name="searchContent" value="{{searchContent}}">
+{% endif %}
+<input type="submit" value="Pagina">
+</form>
+
+<table> 
+<thead> 
+<tr> 
+    <th>Name</th> 
+ 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for video in videos %}
+<tr> 
+	<td>{{ video.name }}<b> por: </b>{{video.username.id()}}({{video.creationdate.strftime("%d.%m.%Y %H:%M:%S")}})  </td>
+
+    <td><a href="/video/view/{{ video.key.urlsafe() }}">Detalles</a></td>
+					{% if session['usertype']=='Admin' or video.username.id() == session['username'] %}
+    				<td><a href="/video/edit/{{ video.key.urlsafe() }}">Editar</a></td>
+					<td> 
+						<form action="/video/delete" method="post">
+							<input type="hidden" name="key" value="{{video.key.urlsafe()}}">
+							<input type="submit"  value="Borrar">
+						</form>
+					</td>
+					{% else %}
+						<td>&nbsp;</td> 
+						<td>&nbsp;</td> 
+					{% endif %}
+
+          </tr>
+					{% endfor %}
+
+        </tbody>
+      </table>
+
+
+<form action="/video/list" method='post'>
+<input type="text" name="searchContent" value="{{searchContent}}">
+<input type="submit" value="Buscar en el contenido">
+</form>
+
+{% if searchContent %}
+
+<form action="/video/list" method='post'>
+<input type="submit" value="Quita filtro">
+</form>
+{% endif %}
+
+
+
+<br/>
+
+
+<br/>
+{% else %}
+	<h3>No hay ningun video</h3>
+{% endif %}
+
+<a href="/video/new">Nuevo video</a>
+
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+
+{% block pagetitle %} Confirmar pedido {% endblock %}
+
+{% block body %}
+
+{% if order and order.items|length > 0%}
+Compras:
+<ul>
+{% for item in order.items %}
+	<li>{{item.ref.get().name}}: {{item.qty}}</li>
+{% endfor %}
+</ul>
+{{ forms.display_errors(errors) }}
+<form action="/order/create" method="post">
+
+	<dl>
+	<dt>Observaciones(rellenar datos de contacto: dirección, teléfono y otra cosa que crea necesario):</dt> <dd>{{ forms.textarea('obs') }}</dd>
+</dl>
+<p>
+Despues de confirmar el pedido podra editarlo hasta que el administrador lo apruebe
+y empezara con un nuevo carrito de compras.
+</p>
+
+<div><input type="submit" value="Confirmar"></div>
+</form>
+
+{% else %}
+	<div style="color: red">No hay compras</div>
+
+{% endif %}
+
+
+{% endblock %}

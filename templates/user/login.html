@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Entrar {% endblock %}
+
+{% block body %}
+
+{{ forms.display_errors(errors) }}
+<form action="/user/login" method="post">
+	<dl>
+	<dt>Nombre de usuario</dt> <dd>{{ forms.input('username') }}</dd>
+	<dt>Password</dt> <dd>{{ forms.input('password', type='password') }}</dd>
+
+	<div><input type="submit" value="Entrar"></div>
+
+</form>
+{% endblock %}

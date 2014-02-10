@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Productos {% endblock %}
+
+{% block body %}
+
+<table id="myTable" class="tablesorter"> 
+<thead> 
+<tr> 
+    <th data-sortBy="name" data-filterBy="name">Name</th> 
+    <th>Visible</th>
+    <th data-sortBy="category.name" data-filterBy="category.name">Categoria</th>
+ 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for product in products %}
+<tr> 
+	<td>{{ product.name }}</td>
+	<td>{{ product.visible }}</td>
+	<td>{{ product.category.get().name }}</td>
+
+    <td><a href="/product/view/{{ product.key.urlsafe() }}">Detalles</a></td>
+    <td><a href="/product/edit/{{ product.key.urlsafe() }}">Editar</a></td>
+		<td> 
+			<form action="/product/delete" method="post">
+				<input type="hidden" name="key" value="{{product.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+</tr>
+{% endfor %}
+<tbody></table> 
+
+
+
+<a href="/product/deleteAll">Borrar todos los productos</a>
+
+{% endblock %}

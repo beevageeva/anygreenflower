@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} Importar CSV: {% endblock %}
+
+{% block body %}
+
+
+<form action="{{upload_url}}" method="post" enctype="multipart/form-data" >
+	<dl>
+	<dt>Fichero CSV:</dt> <dd>
+		<input type="file" name="file">
+	</dd>
+	</dl>
+	<div><input type="submit" value="Sumbit"></div>
+
+</form>
+{% endblock %}

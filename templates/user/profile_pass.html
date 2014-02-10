@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Cambiar perfil - contraseña {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/user/profile_pass" method="post">
+	<dl>
+	<dt>Password</dt> <dd>{{ forms.input('password', type='password') }}</dd>
+	<dt>Password confirmation</dt> <dd>{{ forms.input('passwordConfirmation', type='password') }}</dd>
+
+	<div><input type="submit" value="Cambiar"></div>
+
+</form>
+{% endblock %}

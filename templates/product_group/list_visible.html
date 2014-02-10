@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block head %}
+
+ <script>
+$(function() {
+$( "#accordion" )
+.accordion({
+header: "> div > h3"
+})
+.sortable({
+axis: "y",
+handle: "h3",
+stop: function( event, ui ) {
+// IE doesn't register the blur when sorting
+// so trigger focusout handlers to remove .ui-state-focus
+ui.item.children( "h3" ).triggerHandler( "focusout" );
+}
+});
+});
+</script>
+{% endblock %}
+
+{% block pagetitle %} Productos {% endblock %}
+{% block body %}
+
+
+{% include "/order/order_dialog.html" ignore missing %}
+
+
+{% if categories|length > 0  or product_groups|length > 0 %}
+
+<div id="accordion">
+
+{% for category in categories %}
+<div class="group">
+<h3>Categoria: {{category.name}}</h3>
+<div>
+<p> <table>
+					{% for product in category.get_products_visible() %}
+          <tr>
+            <td>{{product.name}}</td>
+    				<td><a href="/product/view/{{ product.key.urlsafe() }}">Detalles</a></td>
+				<td><img src="/download/{{product.imgBlobKey}}" width="80" height="60" alt="imagen no disponible"/></td>
+						<td>
+
+						<button class="create-order" data-ref="{{ product.key.urlsafe() }}" >Pedir</button>
+
+					</td>
+          </tr>
+					{% endfor %}
+</p></table>
+</div>
+</div>
+{% endfor %}
+<div class="group">
+<h3>Cestas</h3>
+<div>
+<p> <table>
+					{% for pg in product_groups %}
+          <tr>
+            <td>{{pg.name}}</td>
+    				<td><a href="/product_group/view/{{ pg.key.urlsafe() }}">Detalles</a></td>
+    				<td>&nbsp;</td>
+						<td>
+
+							<button class="create-order" data-ref={{ pg.key.urlsafe() }} >Pedir</button>
+
+					</td>
+          </tr>
+					{% endfor %}
+</p></table>
+</div>
+</div>
+</div>
+<br/>
+<br/>
+<a href="/product_group/list_visible_treetable">Vista como arbol</a></td>
+<br/>
+
+{% else %}
+	<h3>No hay ninguna categoria definida o cesta para la venta</h3>
+{% endif %}
+
+
+
+{% endblock %}

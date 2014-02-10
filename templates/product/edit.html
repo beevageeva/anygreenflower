@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Editar producto {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/product/edit" method="post">
+{{ forms.input('key', product.key.urlsafe(), "hidden") }}
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name', product.name) }}</dd>
+	<dt>Descr</dt> <dd>{{ forms.textarea('description', product.description) }}</dd>
+	<dt>Precio</dt> <dd>{{ forms.input('price', product.price) }}</dd>
+	<dt>Unidad</dt> <dd>{{ forms.input('units', product.units) }}</dd>
+	<dt>Categoria</dt> <dd>
+			<select name="category">	
+			{% for categ in categories %}
+		{% set oval = categ.key.urlsafe() %}
+    	<option value="{{oval}}" 
+		{% if oval == product.category.urlsafe() %}
+			 selected="selected"
+		{% endif %}
+		>{{categ.name}}</option>
+
+		{% endfor %}
+
+		</select>
+
+	</dd>
+	<dt>Imagen:</dt> <dd><img src="/download/{{product.imgBlobKey}}" width="400" height="300" alt="imagen no disponible"/>(<a href="/product/upload_image/{{ product.key.urlsafe()}}">Cambiar</a>)</dd>
+	<dt>Visible</dt> <dd>
+	<input type="checkbox" name="visible"	value="True" 
+	{% if product.visible %}
+		checked="checked"
+	{% endif %}
+	></dd>
+	</dl>	
+	<div><input type="submit" value="Sumbit"></div>
+
+</form>
+<a href="/product/view/{{ product.key.urlsafe() }}">Detalles</a> <br/>
+{% endblock %}

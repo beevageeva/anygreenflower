@@ -1,0 +1,44 @@
+
+<div id="dialog-form" title="Comentario">
+  <p>Introduzca el comentario</p>
+ 
+  <form id="createComment" action="/post/new" method="post" >
+  <fieldset>
+    <input type="hidden" name="parent_key" id="ref">
+    <textarea name="content" cols="10" rows="2" id="content" class="text ui-widget-content ui-corner-all"> </textarea>
+		<br/>
+		<input type="submit" value="Comentar" >
+  </fieldset>
+  </form>
+</div>
+
+  <script>
+  $(function() {
+
+		$( "#dialog-form" ).dialog({
+      autoOpen: false,
+      height: 300,
+      width: 600,
+      modal: true,
+      buttons: {
+        Cancel: function() {
+          $( this ).dialog( "close" );
+        }
+      },
+      close: function() {
+          $( this ).dialog( "close" );
+      }
+    });
+ 
+    $( ".create-post" )
+      .button()
+      .click(function() {
+        $( "#dialog-form" ).dialog( "open" );
+				$("#ref").val($(this).attr('data-ref'));
+      });
+
+
+	});
+
+  </script>
+

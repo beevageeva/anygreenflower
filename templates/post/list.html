@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block head %}
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.css" />
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.theme.default.css" />
+
+
+{% endblock %}
+
+{% block pagetitle %} Preguntas {% endblock %}
+{% block body %}
+
+{{ forms.display_errors(errors) }}
+
+{% include "/post/new_dialog.html" ignore missing %}
+{% include "/post/edit_dialog.html" ignore missing %}
+
+
+{% if posts|length > 0  %}
+Numero de pag: {{numPages}}
+<form action="/post/list" method='post'>
+<select name='page'>
+{% for p in range(numPages) %}
+	<option value='{{p}}' {{ "selected='selected'" if page==p else "" }}>{{p+1}}</option>
+{% endfor %}
+</select>
+{%if searchContent %}
+	<input type="hidden" name="searchContent" value="{{searchContent}}">
+{% endif %}
+<input type="submit" value="Pagina">
+</form>
+
+      <table id="example-basic">
+				<caption>           
+					(<a href="#" onclick="jQuery('#example-basic').treetable('expandAll'); return false;">Expand all</a>
+          <a href="#" onclick="jQuery('#example-basic').treetable('collapseAll'); return false;">Collapse all</a>)
+			</caption>
+
+        <thead>
+          <tr>
+            <th>Contenido</th>
+            <th>Comentar</th>
+            <th>Editar</th>
+            <th>Borrar</th>
+          </tr>
+        </thead>
+        <tbody>
+					{% for post in posts %}
+          <tr data-tt-id="{{post.key.urlsafe()}}" {{"data-tt-parent-id=%s"%post.parent.urlsafe()  if post.parent else "" }} >
+            <td style='color:#111111'id="content{{post.key.urlsafe()}}">
+							{% set vars = {'content': post.content | e} %}
+							{%if searchContent %}
+								{% if vars.update({'content': vars.content.replace(searchContent, "*%s*"%searchContent )}) %}{% endif %}
+							{%endif %}
+							 {{vars.content|safe }}<b> por: </b>{{post.username.id()}}({{post.creationdate.strftime("%d.%m.%Y %H:%M:%S")}})
+						</td>
+						<td>
+
+						<button class="create-post" data-ref="{{ post.key.urlsafe() }}" >Comentar</button>
+
+					</td>
+					{% if session['usertype']=='Admin' or post.username.id() == session['username'] %}
+			    <td>
+						<button class="edit-post" data-ref="{{ post.key.urlsafe() }}" data-content="{{ post.content }}"  >Editar</button>
+					</td>
+					<td> 
+						<form action="/post/delete" method="post">
+							<input type="hidden" name="key" value="{{post.key.urlsafe()}}">
+							<input type="submit"  value="Borrar">
+						</form>
+					</td>
+					{% else %}
+						<td>&nbsp;</td> 
+						<td>&nbsp;</td> 
+					{% endif %}
+
+          </tr>
+					{% endfor %}
+
+        </tbody>
+      </table>
+
+
+<form action="/post/list" method='post'>
+<input type="text" name="searchContent" value="{{searchContent}}">
+<input type="submit" value="Buscar">
+</form>
+
+{% if searchContent %}
+
+<form action="/post/list" method='post'>
+<input type="submit" value="Quita filtro">
+</form>
+{% endif %}
+
+
+    <script src="/javascript/jquery.treetable.js"></script>
+    <script>
+      $("#example-basic").treetable({ expandable: true });
+      $("#example-basic").treetable("expandAll");
+		</script>
+
+<br/>
+
+
+<br/>
+{% else %}
+	<h3>No hay ninguna pregunta en el foro</h3>
+{% endif %}
+
+<button class="create-post" data-ref="NONE" >Nueva pregunta</button>
+
+
+{% endblock %}

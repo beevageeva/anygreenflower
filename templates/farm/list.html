@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block pagetitle %} 
+{% if(not username) %}
+	Mis Cultivos 
+{% elif username=="-"%} 
+	Todos los cultivos
+{% else%} 
+	Los cultivos de {{username}}
+{% endif %}
+
+{% endblock %}
+
+{% block body %}
+
+{% if farms|length > 0 %}
+<table class="gridtable"> 
+<thead> 
+<tr> 
+    <th>Name</th> 
+    <th>Fecha creación</th>
+		{% if username=="-" %}
+    	<th>Usuario</th>
+		{% endif %}
+ 
+		<th> Ver </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for farm in farms %}
+<tr class="{{ loop.cycle('odd', 'even') }}"> 
+	<td>{{ farm.name }}</td>
+	<td>{{ farm.creationdate.strftime("%d.%m.%Y %H:%M:%S") }}</td>
+	{% if username=="-" %}
+	{% set thisuser = farm.username.id() %}
+  <td><a href="/farm/list/{{thisuser}}">{{thisuser}}</a></td>
+	{% endif %}
+
+  <td><a href="/farm/view/{{ farm.key.urlsafe() }}">Detalles</a></td>
+	<td> 
+			<form action="/farm/delete" method="post">
+				<input type="hidden" name="key" value="{{farm.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+	</td>
+</tr>
+{% endfor %}
+<tbody></table> 
+
+{% endif %}
+{%if not username %}
+<a href="/farm/new">Nuevo</a>
+{% endif %}
+
+{% endblock %}

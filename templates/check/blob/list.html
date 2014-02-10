@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Products {% endblock %}
+
+{% block body %}
+
+<table id="myTable" > 
+<thead> 
+<tr> 
+    <th>Filename</th> 
+    <th>Delete</th>
+    <th>Asociado</th>
+ 
+</tr> 
+</thead> 
+<tbody> 
+
+{% for blob in blobs %}
+<tr> 
+	<td>{{ blob.filename }}</td>
+
+		<td> 
+			<form action="/check/blob/delete" method="post">
+				<input type="hidden" name="blob_key" value="{{blob.key()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+	<td>
+{% if blob in blob_products  %}   	
+	{% set obj =  blob_products[blob]  %}   	
+	Producto: {{obj.name}}, categoria: {{obj.category.get().name}} 
+{% elif blob in blob_videos %}
+		{% set obj =  blob_videos[blob]  %}   	
+		Video: {{obj.name}} creado por: {{obj.username.id()}} 
+
+{% endif %}
+
+
+	</td>
+</tr>
+{% endfor %}
+<tbody></table> 
+
+
+
+{% endblock %}

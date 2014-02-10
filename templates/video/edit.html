@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Editar producto {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/video/edit" method="post">
+{{ forms.input('key', video.key.urlsafe(), "hidden") }}
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name', video.name) }}</dd>
+	<dt>Contenido</dt> <dd>{{ forms.textarea('content', video.content) }}</dd>
+
+
+	<dt>Video:</dt> <dd>
+
+
+
+<video src="/download/{{video.videoBlobKey}}" poster="/images/default_video_image.jpg" controls>
+	This is fallback content to display if the browser
+	does not support the video element.
+</video>
+
+<br/>
+<a href="/video/upload_video/{{ video.key.urlsafe()}}">Cambiar</a>
+</dd>
+
+<div><input type="submit" value="Sumbit"></div>
+
+</form>
+<a href="/video/view/{{ video.key.urlsafe() }}">Detalles</a> <br/>
+{% endblock %}

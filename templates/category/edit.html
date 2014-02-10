@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Editar categoria {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/category/edit" method="post">
+{{ forms.input('key', category.key.urlsafe(), "hidden") }}
+	<dl>
+	<dt>Name</dt> <dd>{{ forms.input('name', category.name) }}</dd>
+	<dt>Descr</dt> <dd>{{ forms.input('description', category.description) }}</dd>
+	</dl>	
+	<div><input type="submit" value="Sumbit"></div>
+
+</form>
+{% endblock %}

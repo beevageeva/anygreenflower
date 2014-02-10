@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Nuevo producto {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/product/new" method="post">
+
+	{{ forms.input('category_key', category_key, "hidden") }}
+	<dl>
+	<dt>Nombre</dt> <dd>{{ forms.input('name') }}</dd>
+	<dt>Descripcion</dt> <dd>{{ forms.textarea('description') }}</dd>
+	<dt>Precio</dt> <dd>{{ forms.input('price', '0') }}</dd>
+	<dt>Unidad</dt> <dd>{{ forms.input('units', 'kg') }}</dd>
+	<dt>Visible</dt> <dd>
+	<input type="checkbox" name="visible"	value="True" checked="checked">
+
+	</dd>
+	</dl>	
+
+	<div><input type="submit" value="Crear"></div>
+
+</form>
+{% endblock %}

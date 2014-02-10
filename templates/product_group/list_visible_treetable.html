@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block head %}
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.css" />
+    <link rel="stylesheet" href="/stylesheets/treetable/jquery.treetable.theme.default.css" />
+
+
+{% endblock %}
+
+{% block pagetitle %} Productos {% endblock %}
+{% block body %}
+
+
+{% include "/order/order_dialog.html" ignore missing %}
+
+
+{% if categories|length > 0  or product_groups|length > 0 %}
+
+      <table id="example-basic">
+				<caption>           
+					(<a href="#" onclick="jQuery('#example-basic').treetable('expandAll'); return false;">Expand all</a>
+          <a href="#" onclick="jQuery('#example-basic').treetable('collapseAll'); return false;">Collapse all</a>)
+			</caption>
+
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Detalles</th>
+            <th>Imagen</th>
+            <th>Pedir</th>
+          </tr>
+        </thead>
+        <tbody>
+					{% for category in categories %}
+          <tr data-tt-id="{{category.key.urlsafe()}}">
+            <td style='color:#111111'>Categoria: {{category.name}}</td>
+    				<td>&nbsp;</td>
+    				<td>&nbsp;</td>
+            <td>&nbsp;</td>
+          </tr>
+					{% for product in category.get_products_visible() %}
+          <tr data-tt-id="{{product.key.urlsafe()}}" data-tt-parent-id="{{category.key.urlsafe()}}">
+            <td>{{product.name}}</td>
+    				<td><a href="/product/view/{{ product.key.urlsafe() }}">Detalles</a></td>
+				<td><img src="/download/{{product.imgBlobKey}}" width="80" height="60" alt="imagen no disponible"/></td>
+						<td>
+
+						<button class="create-order" data-ref="{{ product.key.urlsafe() }}" >Pedir</button>
+
+					</td>
+          </tr>
+					{% endfor %}
+					{% endfor %}
+
+          <tr data-tt-id="ProductGroupTTId">
+    				<td style='color:#111111'>Cestas</td>
+    				<td>&nbsp;</td>
+    				<td>&nbsp;</td>
+    				<td>&nbsp;</td>
+          </tr>
+					{% for pg in product_groups %}
+          <tr data-tt-id="{{pg.key.urlsafe()}}" data-tt-parent-id="ProductGroupTTId">
+            <td>{{pg.name}}</td>
+    				<td><a href="/product_group/view/{{ pg.key.urlsafe() }}">Detalles</a></td>
+    				<td>&nbsp;</td>
+						<td>
+
+							<button class="create-order" data-ref={{ pg.key.urlsafe() }} >Pedir</button>
+
+					</td>
+          </tr>
+					{% endfor %}
+
+
+        </tbody>
+      </table>
+
+
+
+
+    <script src="/javascript/jquery.treetable.js"></script>
+    <script>
+      $("#example-basic").treetable({ expandable: true });
+      $("#example-basic").treetable("expandAll");
+		</script>
+
+<br/>
+<a href="/product_group/list_visible">Vista anterior</a></td>
+<br/>
+{% else %}
+	<h3>No hay ninguna categoria definida o cesta para la venta</h3>
+{% endif %}
+
+
+
+{% endblock %}

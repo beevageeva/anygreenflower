@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block pagetitle %} Lista de pedidos 
+		{% if username %}
+			de {{username}}
+		{% endif %}
+{% endblock %}
+
+{% block body %}
+
+{% if orders|length > 0 %}
+<table class="gridtable"> 
+<thead> 
+<tr> 
+    <th>Estado</th> 
+    <th>Creación</th>
+ 
+		<th> Ver </th>
+		<th> Editar </th>
+		<th> Borrar </th>
+</tr> 
+</thead> 
+<tbody> 
+
+{% for order in orders %}
+<tr> 
+	<td>{{ order.state }}</td>
+	<td>{{ order.creationdate.strftime("%d.%m.%y %H:%M:%s") }}
+		{% if not username %}
+		<b> por: </b> 		
+		<a href="/order/list/{{ order.username.id() }}">{{order.username.get().name}}</a>
+		{% endif %}
+	</td>
+
+    <td><a href="/order/view/{{ order.key.urlsafe() }}">Detalles</a></td>
+{% if order.state!="new" and (session["usertype"] == "Admin" or order.state ==  "created") %}
+    <td><a href="/order/edit/{{ order.key.urlsafe() }}">Editar</a></td>
+		<td> 
+			<form action="/order/delete" method="post">
+				<input type="hidden" name="key" value="{{order.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+			</form>
+		</td>
+{% else %}
+		<td>&nbsp;</td> 
+		<td>&nbsp;</td> 
+{% endif %}
+
+</tr>
+{% endfor %}
+<tbody></table> 
+
+{% else %}
+	No hay pedidos
+{% endif %}
+
+
+
+{% endblock %}

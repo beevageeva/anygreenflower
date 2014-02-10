@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Editar usuario {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/user/edit" method="post">
+{{ forms.input('username', user.username, "hidden") }}
+	<dl>
+	<dt>Email</dt> <dd>{{ forms.input('email', user.email) }}</dd>
+	<dt>Name</dt> <dd>{{ forms.input('name', user.name) }}</dd>
+	<dt>Telefono</dt> <dd>{{ forms.input('phone', user.phone) }}</dd>
+	<dt>Direcci&#243;n</dt> <dd>{{ forms.textarea('address', user.address) }}</dd>
+	<dt>Admin</dt> <dd>
+		<input type="checkbox" name="isadmin" value="True"{{ "checked" if user.usertype=="Admin" else "" }} >
+	</dd>
+
+	
+
+	<div><input type="submit" value="Sumbit"></div>
+
+</form>
+Para cambiar la contraseña pulsa: <a href="/user/change_pass/{{user.username}}">AQUI</a>
+{% endblock %}

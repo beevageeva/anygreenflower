@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Editar usuario - cambiar contraseña{% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/user/change_pass" method="post">
+{{ forms.input('username',username, "hidden") }}
+	<dl>
+	<dt>Password</dt> <dd>{{ forms.input('password', type='password') }}</dd>
+	<dt>Password confirmation</dt> <dd>{{ forms.input('passwordConfirmation', type='password') }}</dd>
+
+	<div><input type="submit" value="Cambiar"></div>
+
+</form>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} Detalles del video {% endblock %}
+
+{% block body %}
+
+<h2>  {{ video.name }}</h2>
+
+<video src="/download/{{video.videoBlobKey}}" poster="/images/default_video_image.jpg" controls>
+	This is fallback content to display if the browser
+	does not support the video element.
+</video>
+
+<p>
+	{{ video.content | safe }}
+</p>
+{% if session['usertype'] == "Admin" or video.username.id() == session['username']   %}	
+
+  <a href="/video/edit/{{ video.key.urlsafe() }}">Editar</a> <br/>
+	<form action="/video/delete" method="post">
+				<input type="hidden" name="key" value="{{video.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+	</form><br/>
+{% endif %}
+<br/>
+{% endblock %}

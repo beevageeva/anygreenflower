@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Editar perfil {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="/user/profile" method="post">
+	<dl>
+	<dt>Correo electr&#243;nico</dt> <dd>{{ forms.input('email', user.email) }}</dd>
+	<dt>Nombre</dt> <dd>{{ forms.input('name', user.name) }}</dd>
+	<dt>Telefono</dt> <dd>{{ forms.input('phone', user.phone) }}</dd>
+	<dt>Direcci&#243;n</dt> <dd>{{ forms.textarea('address', user.address) }}</dd>
+	<div><input type="submit" value="Editar"></div>
+
+</form>
+
+Para cambiar la contraseña pulsa: <a href="/user/profile_pass">AQUI</a>
+{% endblock %}

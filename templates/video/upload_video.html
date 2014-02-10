@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} Cargar imagen: {% endblock %}
+
+{% block body %}
+
+
+{{ forms.display_errors(errors) }}
+<form action="{{upload_url}}" method="post" enctype="multipart/form-data" >
+{{ forms.input('key', key , "hidden") }}
+	<dl>
+	<dt>Fichero de la imagen:</dt> <dd>
+		<input type="file" name="file">
+	</dd>
+	</dl>
+	<div><input type="submit" value="Sumbit"></div>
+
+</form>
+{% endblock %}

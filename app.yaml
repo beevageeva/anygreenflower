@@ -1,0 +1,64 @@
+application: anygreenflower
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: /stylesheets
+  static_dir: stylesheets
+
+- url: /images
+  static_dir: images
+
+- url: /static
+  static_dir: static
+
+- url: /javascript
+  static_dir: javascript
+
+- url: /test
+  static_dir: test
+
+- url: /download/.*
+  script: download.application
+
+- url: /check/.*
+  script: check.application
+
+- url: /user/.*
+  script: user.application
+
+- url: /category/.*
+  script: category.application
+
+- url: /product/.*
+  script: product.application
+
+- url: /post/.*
+  script: post.application
+
+- url: /video/.*
+  script: video.application
+
+- url: /product_group/.*
+  script: product_group.application
+
+- url: /order/.*
+  script: order.application
+
+- url: /game/.*
+  script: game.application
+
+- url: /farm/.*
+  script: farm.application
+
+- url: /.*
+  script: home.application
+
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest

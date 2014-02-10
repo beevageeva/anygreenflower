@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} Detalles del producto {% endblock %}
+
+{% block body %}
+{% include "/order/order_dialog.html" ignore missing %}
+<h2>  {{ product.name }}</h2>
+<button class="create-order" data-ref="{{ product.key.urlsafe() }}" >Pedir</button>
+<img src="/download/{{product.imgBlobKey}}" width="400" height="300" alt="imagen no disponible"/><br/>
+<p>
+	{{ product.description | safe }}
+</p>
+	<dl>
+	<dt>Precio:</dt> <dd>{{ product.price }}/{{product.units}} </dd>
+	<dt>Categoria:</dt> <dd>{{ product.category.get().name }}</dd>
+	</dl>
+{% if session['usertype'] == "Admin" %}	
+	Visible: {{ product.visible }}<br/>
+
+  <a href="/product/edit/{{ product.key.urlsafe() }}">Editar</a> <br/>
+	<form action="/product/delete" method="post">
+				<input type="hidden" name="key" value="{{product.key.urlsafe()}}">
+				<input type="submit"  value="Borrar">
+	</form><br/>
+{% endif %}
+<br/>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "layout.html" %}
+{% import 'forms.html' as forms %}
+
+{% block pagetitle %} 
+	Editar pedido
+{% endblock %}
+
+{% block body %}
+
+<p><b>Estado: </b> {{order.state}} </p>
+
+<form action="/order/edit" method="post">
+	 {{ forms.input('key', order.key.urlsafe(), 'hidden') }}
+	<p>
+	<b>Observaciones:</b><br/>
+	 {{ forms.textarea('obs', order.obs) }}
+	</p>
+	<p>
+		<input type="submit" value="Actualizar"/>
+	</p>
+</form>
+
+{%if order and order.items|length > 0%}
+	<table>
+	<thead>
+	<caption>Contenido: </caption>
+	<tr><th>Nombre</th><th>Cantidad</th>
+		<th>Quitar</th>
+	</tr>	
+	</thead>
+	<tbody>
+	{% for item in order.items  %}
+		<tr>
+			<td>
+				{{item.ref.get().name}}
+			</td>
+			<td>
+				{{item.qty}}
+			</td>
+			<td>
+				<form action="/order/remove" method="post">
+					<input name="key" type="hidden" value="{{order.key.urlsafe()}}">
+					<input name="refkey" type="hidden" value="{{item.ref.urlsafe()}}">
+					<input type="submit" value="Quitar">
+				</form>
+			</td>
+		</tr>
+	{% endfor  %}
+	</tbody></table>
+	<p>
+				<form action="/order/delete" method="post">
+					<input name="key" type="hidden" value="{{order.key.urlsafe()}}">
+					<input type="submit" value="Borrar pedido">
+				</form> <br/>
+				{% if session["usertype"] == "Admin" and order.state=="created" %}
+				<form action="/order/approve" method="post">
+					<input name="key" type="hidden" value="{{order.key.urlsafe()}}">
+					<input type="submit" value="Aprovar pedido">
+				</form>
+				{% endif %}
+
+	</p>
+
+{% else %}
+	<h2> No hay compras</h2>
+{% endif %}
+
+<p>
+	<b> Fecha creación:</b>	{{order.creationdate.strftime("%d.%m.%Y %H:%M:%S")}}
+
+{%if order.state != "new"%}
+	por {{order.username.get().name}}		
+	<br/>
+{% else %}
+	<a href="/order/create">Confirmar pedido</a> 
+{% endif %} 
+
+</p>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "layout.html" %}
+
+{% block pagetitle %} 
+
+{%if not order or order.state == "new"%}
+	Carrito
+{% else %}
+	Pedido (estado: {{order.state}})
+{% endif %} 
+
+{% endblock %}
+
+{% block body %}
+
+{%if order and order.items|length > 0%}
+	<table>
+	<thead>
+	<caption>Contenido: </caption>
+	<tr>
+	<th>Nombre</th>
+	<th>Detalles</th>
+	<th>Cantidad</th>
+{% if session["usertype"] == "Admin" or order.state in ["new", "created"] %}
+		<th>Quitar</th>
+{% endif %}
+	</tr>	
+	</thead>
+	<tbody>
+	{% set vars = {'totalprice': 0} %}
+	{% for item in order.items  %}
+	{% set ref = item.ref.get()  %}
+		<tr>
+			
+				{%if ref %}
+				{% if vars.update({'totalprice': vars.totalprice + ref.price * item.qty}) %}{% endif %}
+				<td>
+					{{ref.name}}
+				</td>
+				<td>
+					<a href="/{{'product_group' if item.ref.kind()=='ProductGroupModel' else 'product'}}/view/{{item.ref.urlsafe()}}">Detalles </a>
+				</td>
+				{% else %}
+				<td colspan='2' style='color:red'> borrado</td>
+				{% endif %}
+			<td>
+				{{item.qty}}
+			</td>
+			{% if session["usertype"] == "Admin" or order.state in ["new", "created"] %}
+			<td>
+				<form action="/order/remove" method="post">
+					<input name="key" type="hidden" value="{{order.key.urlsafe()}}">
+					<input name="refkey" type="hidden" value="{{item.ref.urlsafe()}}">
+					<input type="submit" value="Quitar">
+				</form>
+			</td>
+		{% endif %}
+		</tr>
+	{% endfor  %}
+	</tbody></table>
+	<p>
+		<b> Precio total:</b>	{{vars.totalprice}}<br/>
+		<b> Fecha creación:</b>	{{order.creationdate.strftime("%d.%m.%Y %H:%M:%S")}}
+	
+	{%if order.state != "new"%}
+		por {{order.username.get().name}}		
+		<br/>
+		<b> Observaciones:</b>	{{order.obs}}
+	{% else %}
+		<br/>
+		<a href="/order/create">Confirmar pedido</a> 
+	{% endif %} 
+	
+	</p>
+{% else %}
+	<h2> No hay compras</h2>
+{% endif %}
+
+{% endblock %}

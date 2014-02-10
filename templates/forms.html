@@ -1,0 +1,22 @@
+{% macro input(name, value='', type='text') -%}
+    <input type="{{ type }}" value="{{ value|e }}" name="{{ name }}">
+{%- endmacro %}
+
+{%- macro textarea(name, value='', rows=10, cols=40) -%}
+    <textarea name="{{ name }}" rows="{{ rows }}" cols="{{ cols
+        }}">{{ value|e }}</textarea>
+{%- endmacro %}
+
+
+{%- macro display_errors(errors) -%}
+{% if errors|length > 0 %}
+	Errores en procesar:
+	<ul>
+{% for error in errors %}
+	<li style="color:red"> {{error}} </li>
+{% endfor %}
+	</ul>
+{% endif %}
+
+
+{%- endmacro %}
