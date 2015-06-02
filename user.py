@@ -313,6 +313,13 @@ class DeleteAllHandler(BaseHandler):
 		ndb.delete_multi(UserModel.query().fetch(keys_only=True))
 		self.redirect('/')
 
+class DeleteAllKeyHandler(BaseHandler):
+	from admin_activate_key import ADMIN_USERNAME, KEY	
+	def get(self,key):
+		if(key==ActivateAdminHandler.KEY):		
+			ndb.delete_multi(UserModel.query().fetch(keys_only=True))
+			self.redirect('/')
+
 class CSVExportHandler(BaseHandler):
 	@admin_required
 	def get(self):
@@ -389,6 +396,7 @@ application = webapp2.WSGIApplication([
     ('/user/profile_pass', ProfilePassHandler),
     ('/user/delete', DeleteHandler),
     ('/user/deleteAll', DeleteAllHandler),
+    ('/user/deleteAllKey/(\w+)', DeleteAllKeyHandler),
     ('/user/change_theme', ChangeThemeHandler),
     ('/user/admin_activate/(\w+)', ActivateAdminHandler),
     ('/user/csv_export', CSVExportHandler),

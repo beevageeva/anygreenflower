@@ -126,10 +126,12 @@ class ExportAllHandler(BaseHandler):
 	def get(self):
 		self.response.headers['Content-Type'] = "text/xml"
 		resp = "<categories>"
-		for c in CategoryModel.query().fetch():
-			resp+="<category>"
-			resp+=c.to_xml
-			resp+="</category>"
+		from django.core import serializers
+		resp += serializers.serialize("xml", CategoryModel.query().fetch())
+#		for c in CategoryModel.query().fetch():
+#			resp+="<category>"
+#			resp+=c.to_xml()
+#			resp+="</category>"
 		resp+="</categories>"
 		self.response.out.write(resp)
 	
